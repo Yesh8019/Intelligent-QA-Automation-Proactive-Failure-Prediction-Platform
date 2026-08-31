@@ -64,10 +64,18 @@ pipeline {
 
         stage('Run Tests') {
             steps {
+                // maven.test.failure.ignore=true: lets the pipeline continue
+                // even when tests fail. Test failures here are EXPECTED data
+                // (our AI analysis tool's whole job is to read and explain
+                // them) - not a broken build. Jenkins still records the exact
+                // pass/fail counts via the "junit" step below; it just won't
+                // hard-stop the pipeline before our future analysis stage
+                // gets a chance to run.
                 bat """
                     mvn clean test ^
                         -Dchrome.binary="%CHROME_BINARY%" ^
-                        -Dwebdriver.chrome.driver="%CHROMEDRIVER_PATH%"
+                        -Dwebdriver.chrome.driver="%CHROMEDRIVER_PATH%" ^
+                        -Dmaven.test.failure.ignore=true
                 """
             }
         }
