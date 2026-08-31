@@ -28,9 +28,22 @@ public class Hooks {
 
     @Before
     public void setUp() {
-        // WebDriverManager automatically downloads/matches the correct
-        // ChromeDriver version for whatever Chrome is installed on this machine.
-        WebDriverManager.chromedriver().setup();
+        // Optional overrides, set by Jenkins when Chrome isn't installed as a
+        // normal system application (see Jenkinsfile "Setup Chrome for Testing"
+        // stage). Locally, these are unset, so WebDriverManager auto-detects
+        // your normally-installed Chrome exactly as before - nothing changes
+        // for local development.
+        String chromeBinary = System.getProperty("chrome.binary");
+        String chromeDriverPath = System.getProperty("webdriver.chrome.driver");
+
+        if (chromeDriverPath == null || chromeDriverPath.isBlank()) {
+            // WebDriverManager automatically downloads/matches the correct
+            // ChromeDriver version for whatever Chrome is installed on this machine.
+            WebDriverManager.chromedriver().setup();
+        }
+        // else: webdriver.chrome.driver system property is already set (by
+        // Jenkins), so Selenium's ChromeDriver will pick it up directly -
+        // WebDriverManager's own download/detection is skipped entirely.
 
         ChromeOptions options = new ChromeOptions();
         // Running headless: this suite runs on a Jenkins server, which has
@@ -41,6 +54,10 @@ public class Hooks {
         options.addArguments("--headless=new");
         options.addArguments("--window-size=1920,1080");
         options.addArguments("--remote-allow-origins=*");
+
+        if (chromeBinary != null && !chromeBinary.isBlank()) {
+            options.setBinary(chromeBinary);
+        }
 
         // Disable Chrome's password manager / breach-detection popups.
         // saucedemo.com's demo password ("secret_sauce") is publicly known,
