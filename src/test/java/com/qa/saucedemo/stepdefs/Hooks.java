@@ -4,11 +4,14 @@ import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
 import io.github.bonigarcia.wdm.WebDriverManager;
+import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -79,6 +82,18 @@ public class Hooks {
         driver.manage().window().maximize();
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
         driver.get(BASE_URL);
+
+        // Explicit wait: don't hand control to the scenario's first step
+        // until the login page has genuinely finished loading. The 5s
+        // implicit wait above only helps for elements slow to appear on an
+        // ALREADY-loaded page - it doesn't cover the initial page load
+        // itself, which can take longer on a busier/slower CI server than
+        // on a local machine. Without this, the very first interaction of a
+        // scenario (typing into the username field) can intermittently fail
+        // with a NoSuchElementException that looks like an app bug but is
+        // really just a race condition in test setup.
+        new WebDriverWait(driver, Duration.ofSeconds(20))
+                .until(ExpectedConditions.visibilityOfElementLocated(By.id("user-name")));
 
         DriverManager.setDriver(driver);
     }
