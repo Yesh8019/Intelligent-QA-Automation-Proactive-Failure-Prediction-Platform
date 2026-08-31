@@ -79,6 +79,21 @@ pipeline {
                 """
             }
         }
+
+        stage('Analyze Failures with AI') {
+            steps {
+                // "anthropic-api-key" must exist as a Jenkins "Secret text"
+                // credential (Manage Jenkins -> Credentials -> Add). This
+                // keeps the real key out of the Jenkinsfile and out of logs -
+                // Jenkins masks it automatically wherever it would be printed.
+                withCredentials([string(credentialsId: 'anthropic-api-key', variable: 'ANTHROPIC_API_KEY')]) {
+                    dir('analysis-tool') {
+                        bat 'mvn -q clean package -DskipTests'
+                        bat 'java -jar target\\analysis-tool-1.0-SNAPSHOT.jar'
+                    }
+                }
+            }
+        }
     }
 
     post {
@@ -87,8 +102,9 @@ pipeline {
             junit allowEmptyResults: true, testResults: 'target/cucumber-reports/cucumber-junit-report.xml'
 
             // Keeps the JSON report (tags + data for the future AI analysis
-            // tool) and failure screenshots browsable from the build page
-            archiveArtifacts artifacts: 'target/cucumber-reports/**, target/screenshots/**',
+            // tool) and failure screenshots browsable from the build page,
+            // plus the final AI-generated analysis report
+            archiveArtifacts artifacts: 'target/cucumber-reports/**, target/screenshots/**, target/analysis-report/**',
                               allowEmptyArchive: true
         }
     }

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.qa.analysis</groupId>
+    <artifactId>analysis-tool</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>QA Failure Analysis Tool</name>
+    <description>
+        Reads the Cucumber JSON test report produced by the saucedemo-tests
+        project, sends each failure to Claude for a plain-English explanation
+        and severity classification, and produces a Go/No-Go release
+        recommendation. Part of the Intelligent QA Automation and Proactive
+        Failure Prediction Platform.
+    </description>
+
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <anthropic.version>2.57.0</anthropic.version>
+    </properties>
+
+    <dependencies>
+        <!-- Official Anthropic Java SDK: calls the Claude API.
+             It already brings in a compatible Jackson (jackson-databind +
+             jackson-module-kotlin) as a transitive dependency, which we
+             reuse below for our own JSON parsing - declaring a second,
+             separate Jackson version here caused a runtime NoSuchMethodError
+             (version conflict between our declared version and the one the
+             SDK actually needs internally). -->
+        <dependency>
+            <groupId>com.anthropic</groupId>
+            <artifactId>anthropic-java</artifactId>
+            <version>${anthropic.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <release>21</release>
+                </configuration>
+            </plugin>
+
+            <!-- Builds a single runnable JAR with all dependencies included,
+                 so Jenkins can run it with a plain "java -jar" command -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.qa.analysis.Main</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
