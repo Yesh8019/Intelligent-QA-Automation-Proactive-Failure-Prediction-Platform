@@ -33,9 +33,13 @@ public class Hooks {
         WebDriverManager.chromedriver().setup();
 
         ChromeOptions options = new ChromeOptions();
-        // Uncomment to run without opening a visible browser window
-        // (useful later when running inside Jenkins on a server with no display)
-        // options.addArguments("--headless=new");
+        // Running headless: this suite runs on a Jenkins server, which has
+        // no visible display for Chrome to open a window in. --headless=new
+        // runs Chrome without a UI; --window-size ensures a consistent
+        // viewport so screenshots and element positions stay predictable
+        // (headless Chrome defaults to a small window otherwise).
+        options.addArguments("--headless=new");
+        options.addArguments("--window-size=1920,1080");
         options.addArguments("--remote-allow-origins=*");
 
         // Disable Chrome's password manager / breach-detection popups.
