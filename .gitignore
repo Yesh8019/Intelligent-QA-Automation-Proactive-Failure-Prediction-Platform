@@ -1,0 +1,17 @@
+# Maven build output
+target/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+out/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# WebDriverManager cache (auto-downloaded drivers - don't commit binaries)
+.cache/

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.qa.saucedemo</groupId>
+    <artifactId>saucedemo-tests</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>Saucedemo E2E Tests</name>
+    <description>
+        Selenium + Cucumber (JUnit 4 runner) end-to-end test suite for saucedemo.com.
+        Part of the Intelligent QA Automation and Proactive Failure Prediction Platform.
+        Produces JUnit-style XML reports (via Maven Surefire) that will later be consumed
+        by the AI-powered failure analysis tool.
+    </description>
+
+    <properties>
+        <maven.compiler.source>24</maven.compiler.source>
+        <maven.compiler.target>24</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <selenium.version>4.27.0</selenium.version>
+        <webdrivermanager.version>5.9.2</webdrivermanager.version>
+        <cucumber.version>7.34.7</cucumber.version>
+        <junit.version>4.13.2</junit.version>
+        <surefire.version>3.5.2</surefire.version>
+    </properties>
+
+    <dependencies>
+        <!-- Selenium WebDriver: controls the Chrome browser -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>${selenium.version}</version>
+        </dependency>
+
+        <!-- WebDriverManager: auto-downloads/matches the correct ChromeDriver version -->
+        <dependency>
+            <groupId>io.github.bonigarcia</groupId>
+            <artifactId>webdrivermanager</artifactId>
+            <version>${webdrivermanager.version}</version>
+        </dependency>
+
+        <!-- Cucumber: lets us write test scenarios in plain-English Gherkin (.feature files) -->
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-java</artifactId>
+            <version>${cucumber.version}</version>
+        </dependency>
+
+        <!-- Cucumber's JUnit 4 integration: provides the @RunWith(Cucumber.class) runner -->
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-junit</artifactId>
+            <version>${cucumber.version}</version>
+        </dependency>
+
+        <!-- JUnit 4: required by cucumber-junit's runner -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Compiler plugin: targets Java 24 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <release>24</release>
+                </configuration>
+            </plugin>
+
+            <!-- Surefire plugin: runs our JUnit runner class (RunCucumberTest), which in
+                 turn executes all Cucumber scenarios. Surefire's default include pattern
+                 (**/*Test.java) already picks up RunCucumberTest automatically - no
+                 special config needed, unlike the old testng.xml setup. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire.version}</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>
