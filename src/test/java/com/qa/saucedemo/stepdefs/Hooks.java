@@ -57,6 +57,17 @@ public class Hooks {
         options.addArguments("--headless=new");
         options.addArguments("--window-size=1920,1080");
         options.addArguments("--remote-allow-origins=*");
+        // Fixes for unpredictable Chrome behavior seen in builds #5-#7
+        // (varying symptoms - stalled pages, clicks not registering, long
+        // hangs - a classic signature of Chrome running low on shared
+        // memory in a constrained CI environment):
+        // --disable-dev-shm-usage: use disk-backed temp storage instead of
+        //   the small /dev/shm partition, which is easy to exhaust and
+        //   causes exactly this kind of erratic, hard-to-reproduce behavior.
+        // --no-sandbox: avoids sandbox-related crashes/hangs that are more
+        //   common on CI machines than on a normal developer laptop.
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--no-sandbox");
 
         if (chromeBinary != null && !chromeBinary.isBlank()) {
             options.setBinary(chromeBinary);
