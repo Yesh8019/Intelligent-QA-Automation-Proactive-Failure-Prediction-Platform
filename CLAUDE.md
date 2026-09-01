@@ -98,14 +98,22 @@ failure with What Went Wrong / Why / What To Fix.
   into `main` and adding the `anthropic-api-key` Jenkins credential.
 - **Jenkins credential `anthropic-api-key`**: not yet configured (needed
   before the AI analysis Jenkins stage can run).
-- **Known unresolved issue - intermittent network flakiness on Jenkins**:
-  the Jenkins machine occasionally fails to load saucedemo.com at all
-  (`TimeoutException` waiting for `#user-name`, or a raw
-  `ERR_CONNECTION_CLOSED`). Confirmed NOT a code bug - local runs are
-  consistently clean every time. Appears sporadically (seen in builds #5
-  and #6), not on every run. Root cause not yet identified (possibly
-  network/firewall/DNS on that machine, or resource contention). No fix
-  attempted yet - needs more data before deciding on one.
+- **RESOLVED - intermittent network/Chrome flakiness on Jenkins** (was
+  causing varying failures across builds #5, #6, #7 - login page not
+  loading, clicks not registering, long hangs). Root cause: Chrome running
+  low on shared memory in the constrained CI environment. Fixed by adding
+  `--disable-dev-shm-usage` and `--no-sandbox` to Chrome's launch options
+  in `Hooks.java`. Confirmed fixed in build #8: exactly the expected
+  baseline (9 tests, 3 known failures, 0 unexpected errors), and build
+  duration dropped from ~15 minutes back down to ~2.6 minutes.
+- **Open policy question - Go/No-Go rule for known/intentional failures**:
+  currently informal - past verdicts (e.g. build #8) treated the 3
+  intentional planted failures as non-blocking ("app is healthy" = GO),
+  but this was an unstated assumption, not an agreed rule. Under strict
+  CI/CD practice, any failing test should block release unless there's an
+  explicit, documented waiver - "the AI happens to know why" is not a real
+  waiver mechanism. Left unresolved for now by request - revisit before
+  relying on Go/No-Go verdicts for anything beyond this demo.
 - **Jenkins log access**: working. Authenticated via `JENKINS_USER` +
   `JENKINS_API_TOKEN` environment variables (Jenkins personal API token,
   not the account password). Verified working against `localhost:8080`.
